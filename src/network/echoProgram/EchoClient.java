@@ -4,16 +4,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Date;
+
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.Event;
-import javafx.event.EventHandler;
+
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
@@ -27,6 +24,9 @@ public class EchoClient extends Application {
 	TextArea textArea;
 	TextField textField;
 	Button connButton;
+	Socket socket;
+	PrintWriter printWriter;
+	BufferedReader bufferedReader;
 
 	public static void main(String[] args) {
 		// 화면에 창을 띄운다
@@ -47,36 +47,58 @@ public class EchoClient extends Application {
 		connButton.setPrefSize(250, 50);
 		connButton.setOnAction(e -> {
 			try {
-				//연결되면 TextArea의 내용 지운다
+				// 연결되면 TextArea의 내용 지운다
 				textArea.clear();
-				System.out.println("EchoClient ==" + textField.getText());
-				Socket socket = new Socket("localhost", 5556);
+				socket = new Socket("localhost", 5556);
 				printMsg("Server Connection Success");
 				textField.setDisable(false); // 입력상자 활성화
-				PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
-				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream())); // 입력
+				printWriter = new PrintWriter(socket.getOutputStream());
+				bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream())); // 입력
 
-//				printWriter.println(textField.getText());
-//				printWriter.flush();
-//
-//				String msg = bufferedReader.readLine();
-//				printMsg(msg);
-//
-//				bufferedReader.close(); // Stream close
-//				printWriter.close();
-//				socket.close(); // socket close
 			} catch (UnknownHostException e1) {
 				e1.printStackTrace();
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
 		});
-		
+
 		textField = new TextField();
 		textField.setPrefSize(400, 50);
-		textField.setDisable(true); //textField를 처음에 사용할수 없게 설정
-		textField.setOnAction(e ->{
-			
+		textField.setDisable(true); // textField를 처음에 사용할수 없게 설정
+		//Enter 를 치면 Action
+		textField.setOnAction(e -> {
+			String msg = textField.getText();
+			printWriter.println(msg);
+			printWriter.flush();
+			textField.clear();
+			if(!msg.equals("@EXIT")) {
+				try {
+					String revString = bufferedReader.readLine();
+					printMsg(revString);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}else {
+				printMsg("Servier Connection END");
+				textField.setDisable(true);
+				if(printWriter != null) {
+					printWriter.close(); //OutputStream close
+				}
+				if(bufferedReader != null) {
+					try {
+						bufferedReader.close();
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					} //InputStream close
+				}
+				if(socket != null) {
+					try {
+						socket.close();
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					} //Client와 연결된 socket close
+				}
+			}
 		});
 
 		FlowPane flowPane = new FlowPane();
