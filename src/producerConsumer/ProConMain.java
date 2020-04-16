@@ -21,7 +21,7 @@ public class ProConMain {
 		producer.start();
 		
 		try {
-			Thread.sleep(2);
+			Thread.sleep(1);
 			producer.interrupt();
 			Thread.sleep(2);
 			con1.interrupt();
