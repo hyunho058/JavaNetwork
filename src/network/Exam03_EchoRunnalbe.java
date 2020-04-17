@@ -11,6 +11,7 @@ public class Exam03_EchoRunnalbe implements Runnable {
 	BufferedReader bufferedReader;
 	PrintWriter printWriter;
 
+
 	public Exam03_EchoRunnalbe(Socket socket) {
 		this.socket = socket;
 		try {

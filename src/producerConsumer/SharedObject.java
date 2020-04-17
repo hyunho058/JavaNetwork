@@ -20,7 +20,7 @@ public class SharedObject {
 
 		return sharedObject;
 	}
-
+	
 	// Thread에 의해서 공용으로 사용되는 method필요 ,
 	// 2종류의Thread가 있는데 하나는 생산자(자료구조에 데이터를 집어넣는일)
 	// 하나는 소비자(자료구조에서 데이터를 빼내서 혀면에 출력)
