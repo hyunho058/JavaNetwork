@@ -5,6 +5,7 @@ import java.io.IOException;
 
 public class ReceiveRunnable implements Runnable{
 	BufferedReader bufferedReader;
+	ChatClient client = new ChatClient();
 	
 	ReceiveRunnable(BufferedReader bufferedReader){
 		this.bufferedReader=bufferedReader;
@@ -14,15 +15,15 @@ public class ReceiveRunnable implements Runnable{
 		String msg="";
 		try {
 			while(true) {
-				bufferedReader.readLine();
+				msg=bufferedReader.readLine();
 				if(msg == null) {
 					break;
 				}
-//				ChatClient client = new
+				client.printMsg(msg);
+				
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
 	}
 }

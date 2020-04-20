@@ -54,7 +54,8 @@ public class ChatClient extends Application {
 				printMsg("Server Connection Success");
 				textField.setDisable(false); // 입력상자 활성화
 				printWriter = new PrintWriter(socket.getOutputStream());
-				bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream())); // 입력
+				bufferedReader = new BufferedReader(
+						new InputStreamReader(socket.getInputStream())); // 입력
 				
 				//입력받기위한 Thread를 생성하고 실행
 				ReceiveRunnable r = new ReceiveRunnable(bufferedReader);
@@ -98,6 +99,7 @@ public class ChatClient extends Application {
 
 	public void printMsg(String msg) {
 		Platform.runLater(() -> {
+			System.out.println(msg);
 			textArea.appendText(msg + "\n");
 		});
 	}
