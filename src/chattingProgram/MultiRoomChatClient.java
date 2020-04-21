@@ -28,7 +28,7 @@ import javafx.stage.Stage;
 
 public class MultiRoomChatClient extends Application{
 	
-	String userID; //Client Chatting ID
+	String userID ; //Client Chatting ID
 	TextArea textArea; //체팅창
 	Button connBtn; // Chatting Server 와 Connection BTN
 	Button disconnBtn; // Chatting Server 와 disConnection BTN
@@ -37,7 +37,9 @@ public class MultiRoomChatClient extends Application{
 	ListView<String> roomListView; // 체팅방 목록 보여주는 listVIew
 	ListView<String> participantsList; // 체팅방 참여 List
 	String entered ="";
+	String roomName;
 	
+	MultiRoomShareedObject sharedObject;
 	Socket socket;
 	PrintWriter printWriter;
 	BufferedReader bufferedReader;
@@ -85,9 +87,9 @@ public class MultiRoomChatClient extends Application{
 				entered=result.get();
 			}
 			// 원래는 서버에 접속해서 방 목록을 받아와야함.
-			roomListView.getItems().add("서울,경기 등산모임");
-			roomListView.getItems().add("축구 모임");
-			roomListView.getItems().add("JAVA공부방");
+			roomListView.getItems().add("뿌리");
+//			roomListView.getItems().add("축구 모임");
+//			roomListView.getItems().add("JAVA공부방");
 			printMsg("채팅 서버에 접속");
 			printMsg(entered+" 님 환영해");
 			userID = entered;
@@ -118,8 +120,10 @@ public class MultiRoomChatClient extends Application{
 				entered=result.get();
 			}
 			// 방 이름이 서버에 전달이 되어야 한다.
-			roomListView.getItems().add(entered);
+//			roomListView.getItems().add(entered);
 			printMsg("채팅방 " +entered+ " 생성");
+			printWriter.println(entered);
+			printWriter.flush();
 		});
 		connRoomBtn = new Button("접속");
 		connRoomBtn.setPrefSize(150, 40);
@@ -131,10 +135,21 @@ public class MultiRoomChatClient extends Application{
 			// 목록을 받아오면 ListVIew에 출력
 //			printWriter.println(entered);
 //			printWriter.flush();
-			participantsList.getItems().add("감자");
-			participantsList.getItems().add("고구마");
-			participantsList.getItems().add("당근");
-			participantsList.getItems().add("무");
+			participantsList.getItems().add(".감자");
+			printWriter.println(userID);
+			printWriter.flush();
+//			participantsList.getItems().add("고구마");
+//			participantsList.getItems().add("당근");
+//			participantsList.getItems().add("무");
+			
+			disconnBtn = new Button("나가기");
+			disconnBtn.setPrefSize(150, 40);
+			disconnBtn.setOnAction(e1->{
+				String msg = " "+userID + "가 나갔다";
+				printWriter.println(msg);
+				printWriter.flush();
+			});
+			
 			// 밑 부분의 메뉴를 채팅을 입력할 수 있는 화면 전환
 			FlowPane inputFlowPane = new FlowPane();
 			inputFlowPane.setPadding(new Insets(10,10,10,10));
@@ -145,14 +160,18 @@ public class MultiRoomChatClient extends Application{
 			inputTF.setOnAction(e1->{
 				String msg = inputTF.getText();
 //				printMsg(msg);
-				printWriter.println(msg);
+				printWriter.println("-"+userID+":"+msg);
 				printWriter.flush();
 				inputTF.clear();
 			});
-			
+			 
 			inputFlowPane.getChildren().add(inputTF);
+			inputFlowPane.getChildren().add(disconnBtn);
 			root.setBottom(inputFlowPane);
 		});
+		
+		
+		
 		FlowPane menuFlowPane = new FlowPane();
 		menuFlowPane.setPadding(new Insets(10,10,10,10));
 		menuFlowPane.setPrefSize(700, 40);
@@ -192,7 +211,14 @@ public class MultiRoomChatClient extends Application{
 					if(msg == null) {
 						break;
 					}
-					printMsg(msg);
+					if(msg.charAt(0) == '.') {
+						participantsList.getItems().add(msg);
+					}else if(msg.charAt(0) == '/'){
+						roomListView.getItems().add(msg);
+					}else {
+						printMsg(msg);
+					}
+					
 				}
 			} catch (IOException e) {
 				e.printStackTrace();

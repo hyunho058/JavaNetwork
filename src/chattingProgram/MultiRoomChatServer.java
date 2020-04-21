@@ -1,10 +1,8 @@
 package chattingProgram;
 
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -13,7 +11,6 @@ import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
@@ -26,8 +23,12 @@ public class MultiRoomChatServer extends Application{
 	Button serverStopBtn;
 	ServerSocket server;
 	Socket socket;
+	
+	MultiRoomChatRunnable chatRunnable;
 	ExecutorService executorService = Executors.newCachedThreadPool();
 	MultiRoomShareedObject sharedObject = new MultiRoomShareedObject();
+	
+//	Map<String, MultiRoomChatRunnable> clientList = new HashMap<>();
 	
 	public static void main(String[] args) {
 		launch();
@@ -49,9 +50,10 @@ public class MultiRoomChatServer extends Application{
 					server = new ServerSocket(8888);
 					while(true) {
 						Socket socket = server.accept();
-						MultiRoomChatRunnable chatRunnable = 
-								new MultiRoomChatRunnable(socket, sharedObject);
+						chatRunnable = new MultiRoomChatRunnable(
+								socket, sharedObject);
 						sharedObject.add(chatRunnable);
+//						sharedObject.mapAdd(name, chatRunnable);
 						executorService.execute(chatRunnable);
 					}
 				} catch (IOException e1) {

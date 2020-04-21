@@ -38,8 +38,14 @@ public class MultiRoomChatRunnable implements Runnable {
 				//printWriter.flush();
 				
 				//모든 클라이언트에게 데이터를 전달하기 위해 공용객체를 활용
-				sharedObject.broadcast(msg);
-				
+				if(msg.charAt(0) == '.') {
+//					sharedObject.mapAdd(msg);
+					sharedObject.nameBroadcast(msg);
+				}else if(msg.charAt(0)=='/'){
+					sharedObject.addRoom(msg, this);
+				}else {
+					sharedObject.broadcast(msg);
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
