@@ -11,7 +11,10 @@ public class MultiRoomChatRunnable implements Runnable {
 	BufferedReader bufferedReader;
 	PrintWriter printWriter;
 	MultiRoomShareedObject sharedObject;
+	String userID="";
+	String roomName="";
 	
+	//Constructor - Socket과 공용객체를 바아옴
 	public MultiRoomChatRunnable (Socket socket, MultiRoomShareedObject sharedObject) {
 		this.socket=socket;
 		this.sharedObject=sharedObject;
@@ -30,6 +33,7 @@ public class MultiRoomChatRunnable implements Runnable {
 		while (true) {
 			try {
 				msg = bufferedReader.readLine();
+				System.out.println(msg);
 				if (msg == null || msg.equals("@EXIT")) {
 					break;
 				}
@@ -40,11 +44,26 @@ public class MultiRoomChatRunnable implements Runnable {
 				//모든 클라이언트에게 데이터를 전달하기 위해 공용객체를 활용
 				if(msg.charAt(0) == '.') {
 //					sharedObject.mapAdd(msg);
-					sharedObject.nameBroadcast(msg);
-				}else if(msg.charAt(0)=='/'){
-					sharedObject.addRoom(msg, this);
+//					sharedObject.nameBroadcast(msg);
+					userID=msg;
+					System.out.println(roomName+", "+userID+", "+msg);
+					sharedObject.userListPrint(msg, roomName);
+				// RoomCreate
+				}else if(msg.charAt(0)=='/'){ 
+					roomName = msg.replace("/", "");
+					sharedObject.createRoom(msg);
+					printWriter.println("채팅방 :"+roomName+" 생성");
+					System.out.println(roomName +" 방 생성");
+				}else if(msg.charAt(0)=='^' && msg.charAt(1)=='/'){
+					System.out.println("enterRoom=="+msg);
+					roomName = msg.replace("^", "");
+					sharedObject.enterRoom(msg, this);
+				}else if(msg.equals("@나가기")){
+					
 				}else {
-					sharedObject.broadcast(msg);
+					System.out.println(roomName+", "+userID+", "+msg);
+					sharedObject.broadcast(roomName, userID, msg);
+					System.out.println(roomName+"방"+userID+" : "+msg);
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -53,6 +72,9 @@ public class MultiRoomChatRunnable implements Runnable {
 	}
 	public PrintWriter getPrintWriter() {
 		return printWriter;
+	}
+	public String getUserID() {
+		return userID;
 	}
 
 }

@@ -86,9 +86,9 @@ public class MultiRoomChatServer extends Application{
 
 		Scene scene = new Scene(root);
 		primaryStage.setScene(scene); // window(primaryStage) 화면을 Scene로 설정
-		primaryStage.setTitle("Multi Echo Server");
+		primaryStage.setTitle("Multi Room Chatting Server");
 		primaryStage.setOnCloseRequest(e -> {
-			System.out.println("echoServer 종료");
+			System.out.println("Server 종료");
 			System.exit(0); // 0 => program 강제종료
 		});
 		primaryStage.show();
