@@ -29,6 +29,7 @@ public class MultiRoomChatRunnable implements Runnable {
 	}
 	@Override
 	public void run() {
+		//Client 로부터 넘어온 'MSG' 를 판별하여 기능 실행
 		String msg = "";
 		while (true) {
 			try {
@@ -37,6 +38,30 @@ public class MultiRoomChatRunnable implements Runnable {
 				if (msg == null || msg.equals("@EXIT")) {
 					break;
 				}
+				if(msg.startsWith("/userID")) {
+					this.userID = msg.replaceFirst("/userID", "");
+					System.out.println("userID=="+this.userID);
+					continue;
+				}
+				if(msg.startsWith("/createRoom")) {
+					String roomName = msg.replaceFirst("/createRoom", "");
+					printWriter.println(roomName+" 채팅방 생성");
+					System.out.println("CreateRoom =="+roomName);
+					continue;
+				}
+				if(msg.startsWith("/connRoom")) {
+					String roomName = msg.replaceFirst("/connRoom", "");
+					sharedObject.connRoom(roomName, MultiRoomChatRunnable.this);
+					this.roomName = roomName;
+					System.out.println(this.userID);
+					continue;
+				}
+				if(msg.equals("/getRoom")) {
+					String rooms = sharedObject.getRooms();
+					System.out.println("RoomList print"+rooms);
+					continue;
+				}
+				
 				//자신과 연결된 클라이언트에게만 문자열을 전달
 				//printWriter.println(msg);
 				//printWriter.flush();
