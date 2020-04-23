@@ -49,11 +49,10 @@ public class MultiRoomChatServer extends Application{
 				try {
 					server = new ServerSocket(8888);
 					while(true) {
-						Socket socket = server.accept();
+						socket = server.accept();
 						chatRunnable = new MultiRoomChatRunnable(
 								socket, sharedObject);
 						sharedObject.add(chatRunnable);
-//						sharedObject.mapAdd(name, chatRunnable);
 						executorService.execute(chatRunnable);
 					}
 				} catch (IOException e1) {

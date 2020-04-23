@@ -34,6 +34,7 @@ public class MultiRoomChatClient extends Application {
 	Button disconnBtn; // Chatting Server 와 disConnection BTN
 	Button creatRoomBtn; // Chatting Room Create BTN
 	Button connRoomBtn; // Chatting Room 입장 BTN
+	Button disconnRoomBtn; // Chatting Room EXIT BTN
 	BorderPane root;
 	FlowPane menuFlowPane;
 	ListView<String> roomListView; // 체팅방 목록 보여주는 listVIew
@@ -92,7 +93,6 @@ public class MultiRoomChatClient extends Application {
 
 			printMsg("채팅 서버에 접속");
 			printMsg(entered + " 님 환영해");
-			userID = entered;
 			try {
 				// Sockte 이용해 Input, Output Stream 생성
 				socket = new Socket("localhost", 8888);
@@ -104,20 +104,19 @@ public class MultiRoomChatClient extends Application {
 
 				// userID를 지정하는 명령어 실행
 				printWriter.println("/userID" + entered);
+				// 모든 채팅방을 갱신하는 명령어 실행 
+				// 두 번째 이후의 Client가 Server에 접속할 경우 이미 생성되어있는 채팅방을 가져온다.
 				printWriter.println("/getRoom");
+				// 명령어 전송, PrintWriter는 Queue 구조로 먼저 들어간 Message가 먼저 나온다(FIFO)
 				printWriter.flush();
-//				printWriter.println("." + entered);
-				// 모든 채팅방을 갱신하는 명령어 실행
-				// 두 번째 이후의 Client가 Server에 접속할 경우 이미 생성되어있는 채팅방을 가져오기 위함.
-//				printWriter.println("@get");
-				// 명령어 전송, PrintWriter는 Queue처럼 먼저 들어간 Message가 먼저 나온다.
-//				printWriter.flush();
 
 			} catch (UnknownHostException e1) {
 				e1.printStackTrace();
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
+			userID = entered;
+			printMsg(userID+" Connection");
 		});
 
 		disconnBtn = new Button("Disconnection");
@@ -134,30 +133,38 @@ public class MultiRoomChatClient extends Application {
 			dialog.setHeaderText("채팅방 생성 입니다. 채팅 이름 입력해주세요");
 			Optional<String> result = dialog.showAndWait(); // 확인 or 취소 버튼을 누를때까지 기다리는 함수이고 결과 객체를 Optional 객체를 이용해서
 															// return
-			String roomName = "";
+			String entered = "";
 			if (result.isPresent()) {
 				// 닉네임을 입력하고 확인버튼을 누른경우.
-				roomName = result.get();
+				entered = result.get();
 			}
-			printMsg("채팅방 " + roomName + " 생성");
+			printMsg("채팅방 " + entered + " 생성");
 			// 방 이름이 서버에 전달이 되어야 한다.
 			// printWriter 는 'MSG'가 전달 되기 때문에 server에서 식별할수 있는 표시를 해줘야한다
-			printWriter.println("/createRoom" + roomName);
+			printWriter.println("/createRoom" + entered);
 			printWriter.println("/getRoom");
 			printWriter.flush();
 		});
-		connRoomBtn = new Button("접속");
+		connRoomBtn = new Button("Connection Room");
 		connRoomBtn.setPrefSize(100, 40);
 		connRoomBtn.setOnAction(e -> {
 			// 1.어떤 방을 선택했는지 알아야한다.
-			roomName = roomListView.getSelectionModel().getSelectedItem();
+			String roomName = roomListView.getSelectionModel().getSelectedItem();
 			printMsg(roomName + " 방에 입장 했습니다");
 			// 2.현재 방에 참여하고 있는 참여자 목록을 받아야한다.
 			printWriter.println("/connRoom" + roomName);
 			// 3.목록을 받아오면 ListVIew에 출력
 			printWriter.println("/getUser");
 			printWriter.flush();
-
+			//
+			disconnRoomBtn = new Button("EXIT");
+			disconnRoomBtn.setPrefSize(100, 40);
+			disconnRoomBtn.setOnAction(e1->{
+				printWriter.println("/EXIT");
+				printWriter.println("/getUser");
+				printWriter.flush();
+			});
+			
 			// 밑 부분의 메뉴를 채팅을 입력할 수 있는 화면 전환
 			FlowPane inputFlowPane = new FlowPane();
 			inputFlowPane.setPadding(new Insets(10, 10, 10, 10));
@@ -173,6 +180,7 @@ public class MultiRoomChatClient extends Application {
 				inputTF.clear();
 			});
 			inputFlowPane.getChildren().add(inputTF);
+			inputFlowPane.getChildren().add(disconnRoomBtn);
 			root.setBottom(inputFlowPane);
 		});
 
@@ -228,7 +236,7 @@ public class MultiRoomChatClient extends Application {
 			try {
 				while (true) {
 					msg = bufferedReader.readLine();
-					printMsg("ReceiveRunnable == msg ==" + msg);
+//					printMsg("ReceiveRunnable == msg ==" + msg);
 					if (msg == null) {
 						break;
 					}
@@ -263,23 +271,6 @@ public class MultiRoomChatClient extends Application {
 				e.printStackTrace();
 			}
 		}
-
-		public void getRoom(String temp) {
-			printMsg("getRooms()_temp=="+temp);
-			String[] rooms = temp.split(" ");
-			Platform.runLater(() -> {
-				// 기존 Chatting List 제거
-				participantsList.getItems().clear();
-				// Chatting Room 입력
-				for (String room : rooms) {
-					printMsg("getRooms()_for"+room);
-					if (room.equals("/getRoom")) {
-						continue;
-					}
-					roomListView.getItems().add(room);
-				}
-			});
-		}
 		
 		public void getRooms(String tmp) {
 			// 모든 채팅방의 목록
@@ -311,6 +302,5 @@ public class MultiRoomChatClient extends Application {
 				}
 			});
 		}
-
 	}
 }
