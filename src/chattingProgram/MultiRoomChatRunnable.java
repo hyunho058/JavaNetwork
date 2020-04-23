@@ -35,7 +35,7 @@ public class MultiRoomChatRunnable implements Runnable {
 			try {
 				msg = bufferedReader.readLine();
 				System.out.println(msg);
-				if (msg == null || msg.equals("@EXIT")) {
+				if (msg == null || msg.equals("/EXIT")) {
 					break;
 				}
 				if(msg.startsWith("/userID")) {
