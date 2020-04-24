@@ -45,7 +45,7 @@ public class Exam01_DateClient extends Application {
 			// 1. Client는 능동적으로 Server접속
 			// ServerSocket에 접속 (5556)
 			try {
-				Socket socket = new Socket("localhost",5556);
+				Socket socket = new Socket("localhost",5558);
 				BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream())); //입력 Stream
 				String msg = br.readLine();
 				printMsg(msg);

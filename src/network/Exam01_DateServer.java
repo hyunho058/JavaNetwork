@@ -14,7 +14,7 @@ public class Exam01_DateServer {
 		// Client의 Socket 접속을 기다리는 Server Socket을 만든다
 		// 적당한 Port번호를 이용해서 ServerSocket객체를 생성 =>(5556)
 		try {
-			ServerSocket server = new ServerSocket(5556);
+			ServerSocket server = new ServerSocket(5558);
 			System.out.println("Server Create");
 			// 2.Client 의 적속을 기다리기 위한 Method 호출
 			// Client socket에 연결 
