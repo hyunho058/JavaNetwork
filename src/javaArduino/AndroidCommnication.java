@@ -32,7 +32,7 @@ public class AndroidCommnication {
 		
 		//Arduino Serial Communication
 		try {
-			portIdentifier = CommPortIdentifier.getPortIdentifier("COM7");
+			portIdentifier = CommPortIdentifier.getPortIdentifier("COM4");
 			if (portIdentifier.isCurrentlyOwned()) {
 				System.out.println("포트 사용중");
 			} else {

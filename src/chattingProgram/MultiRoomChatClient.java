@@ -89,12 +89,12 @@ public class MultiRoomChatClient extends Application {
 			if (result.isPresent()) {
 				// 닉네임을 입력하고 확인버튼을 누른경우.
 				entered = result.get();
+				printMsg("채팅 서버에 접속");
+				printMsg(entered + " 님 환영해");
 			}
 
-			printMsg("채팅 서버에 접속");
-			printMsg(entered + " 님 환영해");
 			try {
-				// Sockte 이용해 Input, Output Stream 생성
+				// Socket 이용해 Input, Output Stream 생성 (IP, ServerSocket port Number)
 				socket = new Socket("localhost", 8888);
 				printMsg("Server Connection");
 				printWriter = new PrintWriter(socket.getOutputStream());
@@ -141,9 +141,11 @@ public class MultiRoomChatClient extends Application {
 			printMsg("채팅방 " + entered + " 생성");
 			// 방 이름이 서버에 전달이 되어야 한다.
 			// printWriter 는 'MSG'가 전달 되기 때문에 server에서 식별할수 있는 표시를 해줘야한다
-			printWriter.println("/createRoom" + entered);
-			printWriter.println("/getRoom");
-			printWriter.flush();
+			if(entered != "") {
+				printWriter.println("/createRoom" + entered);
+				printWriter.println("/getRoom");
+				printWriter.flush();
+			}
 		});
 		connRoomBtn = new Button("Connection Room");
 		connRoomBtn.setPrefSize(100, 40);
