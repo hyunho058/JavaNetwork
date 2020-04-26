@@ -121,6 +121,10 @@ class DataRunnable implements Runnable {
 	}
 }
 
+class SharedObject{
+	
+}
+
 class SerialListener implements SerialPortEventListener{
 	InputStream in;
 	OutputStream out;
