@@ -135,7 +135,6 @@ class SerialListener implements SerialPortEventListener{
 		this.out = out;
 	}
 	
-	
 	@Override
 	public void serialEvent(SerialPortEvent arg0) {
 		//SerialPortEvent.DATA_AVAILABLE 데이터가 들어온 이벤트

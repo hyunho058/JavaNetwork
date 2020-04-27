@@ -23,8 +23,9 @@ public class Exam02_ArduinoSerialUsingEvent {
 							SerialPort.PARITY_NONE);
 					InputStream in = serialPort.getInputStream();
 					OutputStream out = serialPort.getOutputStream();
-					
-					//데이터 send
+					// Event처리를 통해서 데이터 읽어온다
+					serialPort.addEventListener(new Exam02_SerialListener(in)); // InputStream을 넘겨줘서  Exam02_SerialListener 에서 사용
+					serialPort.notifyOnDataAvailable(true); // 데이터가 들어왔을때 알려주는 method
 
 				} else {
 					System.out.println("Serial Port만 이용 가능");
