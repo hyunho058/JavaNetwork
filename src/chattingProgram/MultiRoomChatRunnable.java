@@ -13,8 +13,8 @@ public class MultiRoomChatRunnable implements Runnable {
 	MultiRoomShareedObject sharedObject;
 	String userID = "";
 	String roomName = "";
-
-	// Constructor - Socket과 공용객체를 바아옴
+	//Construction injection
+	// Constructor - Socket과 공용객체를 답아와 초기화 해준다
 	public MultiRoomChatRunnable(Socket socket, MultiRoomShareedObject sharedObject) {
 		this.socket = socket;
 		this.sharedObject = sharedObject;
@@ -34,11 +34,12 @@ public class MultiRoomChatRunnable implements Runnable {
 			while ((msg = bufferedReader.readLine()) != null) {
 //				msg = bufferedReader.readLine();
 				System.out.println(msg);
+				// /EXIT로 시작하는 메시지를 수신하면, DisRoomConnection
 				if (msg.equals("/EXIT")) {
-					sharedObject.disconnRoom(roomName, this);;
+					sharedObject.disconnRoom(roomName, MultiRoomChatRunnable.this);;
 					printWriter.println("/EXIT");
 					printWriter.flush();
-					break;
+					continue;
 				}
 				// /userID로 시작하는 메시지를 수신하면, user가 userID로 접속
 				if (msg.startsWith("/userID")) {
@@ -56,6 +57,7 @@ public class MultiRoomChatRunnable implements Runnable {
 					System.out.println("CreateRoom ==" + roomName);
 					continue;
 				}
+				// /connRoom으로 시작하는 메시지를 수신하면, 채팅방에 입장 
 				if (msg.startsWith("/connRoom")) {
 					String roomName = msg.replaceFirst("/connRoom", "");
 					sharedObject.connRoom(roomName, MultiRoomChatRunnable.this);

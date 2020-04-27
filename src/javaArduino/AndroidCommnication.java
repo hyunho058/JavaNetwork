@@ -34,7 +34,7 @@ public class AndroidCommnication {
 		
 		//Arduino Serial Communication
 		try {
-			portIdentifier = CommPortIdentifier.getPortIdentifier("COM7");
+			portIdentifier = CommPortIdentifier.getPortIdentifier("COM4");
 			if (portIdentifier.isCurrentlyOwned()) {
 				System.out.println("포트 사용중");
 			} else {
@@ -139,6 +139,10 @@ class DataRunnable implements Runnable {
 	}
 }
 
+class SharedObject{
+	
+}
+
 class SerialListener implements SerialPortEventListener{
 	InputStream in;
 	OutputStream out;
@@ -148,7 +152,6 @@ class SerialListener implements SerialPortEventListener{
 		this.in = in;
 		this.out = out;
 	}
-	
 	
 	@Override
 	public void serialEvent(SerialPortEvent arg0) {

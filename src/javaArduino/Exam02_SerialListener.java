@@ -7,7 +7,6 @@ import gnu.io.SerialPortEventListener;
 
 public class Exam02_SerialListener implements SerialPortEventListener{
 	InputStream in;
-	
 	//Construction injection
 	Exam02_SerialListener(InputStream in){
 		this.in = in;
@@ -24,8 +23,9 @@ public class Exam02_SerialListener implements SerialPortEventListener{
 				
 				System.out.println("Receive Data: "+ new String(data)); 
 				// 위 코드는 System.out.print("Data: "+new String(buffer,0,len)); 와 달리 data에 size가 결정됫기떄문에 data만 명시해준다
-			} catch (Exception e) {
 				
+			} catch (Exception e) {
+				System.out.println(e);
 			}
 		}
 	}

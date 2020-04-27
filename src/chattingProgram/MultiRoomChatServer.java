@@ -47,11 +47,14 @@ public class MultiRoomChatServer extends Application{
 			printMsg("server start");
 			Runnable runnable =()->{
 				try {
-					server = new ServerSocket(8888);
+					server = new ServerSocket(8888); //ServerSocket Port번호 할당
 					while(true) {
+						//accept() Method 에서 Client접독승ㄹ 대가하다 Client 객체가 만들어지고 접속을 하면 다음 codeLine로 넘어간다
 						socket = server.accept();
+						//Runnable 객체에 (socket, 공유객체)해당 param을 넘겨준다
 						chatRunnable = new MultiRoomChatRunnable(
 								socket, sharedObject);
+						//Client Thread를 공용객체 List에 Add
 						sharedObject.add(chatRunnable);
 						executorService.execute(chatRunnable);
 					}
