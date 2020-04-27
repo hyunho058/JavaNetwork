@@ -25,6 +25,8 @@ public class AndroidCommnication {
 	public static void main(String[] args) {
 //		ServerSocket server;
 //		Socket socket;
+//		Socket socket;
+		DataRunnable dataRunnable;
 		ExecutorService executorService = Executors.newCachedThreadPool();
 		CommPortIdentifier portIdentifier;
 
@@ -71,14 +73,20 @@ public class AndroidCommnication {
 			}
 		};
 		executorService.execute(runnable);
+		
+		
+//		Thread thread = new Thread(new DataRunnable());
+//		thread.start();
+		
+		
 	}
 }
 
 class DataRunnable implements Runnable {
 	Socket socket;
+	ServerSocket server;
 	BufferedReader bufferedReader;
 	PrintWriter printWriter;
-	String dataMsg = "";
 
 	public DataRunnable(Socket socket) {
 		this.socket = socket;
@@ -91,6 +99,23 @@ class DataRunnable implements Runnable {
 	}
 	@Override
 	public void run() {
+		
+//		try {
+//			ServerSocket server = new ServerSocket(5566);
+//			while(true) {
+//				socket=server.accept();
+//				try {
+//					String line = bufferedReader.readLine();
+//				} catch (Exception e) {
+//					System.out.println("Exception_run(= )"+e);
+//					e.printStackTrace();
+//				}
+//			}
+//		} catch (Exception e) {
+//			System.out.println("Exception_run(= )"+e);
+//			e.printStackTrace();
+//		}
+		
 		String msg = "";
 		while (true) {
 			try {
@@ -111,13 +136,6 @@ class DataRunnable implements Runnable {
 			}
 
 		}
-	}
-	
-	public void setDataMsg(String dataMsg) {
-		this.dataMsg = dataMsg;
-	}
-	public String getDataMsg() {
-		return this.dataMsg;
 	}
 }
 

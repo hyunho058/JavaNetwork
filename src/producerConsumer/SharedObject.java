@@ -47,5 +47,4 @@ public class SharedObject {
 		}
 		return result;
 	}
-
 }
