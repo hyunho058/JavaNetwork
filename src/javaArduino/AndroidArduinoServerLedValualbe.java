@@ -28,15 +28,15 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 
-public class AndroidArduinoServer extends Application{
+public class AndroidArduinoServerLedValualbe extends Application {
 	TextArea textArea;
 	Button serverStartBtn;
 	Button serverStopBtn;
 	ServerSocket server;
-	Socket socket;	
+	Socket socket;
 	BufferedReader br;
 	PrintWriter pr;
-	BufferedWriter bw; //Arduino 에게 Data 출력(outputStream으로 처리하기 어려워서 BufferedWriter데체)
+	BufferedWriter bw; // Arduino 에게 Data 출력(outputStream으로 처리하기 어려워서 BufferedWriter데체)
 	SerialPort serialPort;
 	InputStream in;
 	OutputStream out;
@@ -44,7 +44,7 @@ public class AndroidArduinoServer extends Application{
 	public static void main(String[] args) {
 		launch();
 	}
-	
+
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		BorderPane root = new BorderPane();
@@ -56,7 +56,7 @@ public class AndroidArduinoServer extends Application{
 		serverStartBtn.setPrefSize(150, 40);
 		serverStartBtn.setOnAction(e -> {
 			printMsg("server start");
-			//ServerSocket을 생성하고 Arduino로부터 데이터 받아옴
+			// ServerSocket을 생성하고 Arduino로부터 데이터 받아옴
 			// Thread 로 만들어야한다
 			Thread thread = new Thread(new Runnable() {
 				@Override
@@ -65,29 +65,18 @@ public class AndroidArduinoServer extends Application{
 						server = new ServerSocket(1234);
 						printMsg("[서버소켓 기동]");
 						socket = server.accept();
-						printMsg("[클라이언트 접속");
-						
+						printMsg("[클라이언트 접속]");
+						//Socket Terminal 
 						br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 						pr = new PrintWriter(socket.getOutputStream());
+						//Android로부터 데이터 받아와 Arduino로 출력
 						String msg = "";
 						while (true) {
-							if((msg = br.readLine())!=null) {
-								if(msg.equals("ON")) {
-									printMsg("LED ON");
-									//Arduino 와의 Stream을 통해 Data Communication
-									bw.write(msg,0,msg.length()); //0 번째부터 길이만큼 보낸다
-									System.out.println("msg==" +msg);
-									bw.flush();
-									continue;
-								}
-								if(msg.equals("OFF")) {
-									printMsg("LED OFF");
-									//Arduino 와의 Stream을 통해 Data Communication
-									bw.write(msg,0,msg.length()); //0 번째부터 길이만큼 보낸다
-									System.out.println("msg==" +msg);
-									bw.flush();
-									continue;
-								}
+							if ((msg = br.readLine()) != null) {
+								System.out.println("Andrid Data==" +msg);
+								bw.write(msg, 0, msg.length()); // 0 번째부터 길이만큼 보낸다
+								bw.newLine(); //BufferedWriter는 뒤에 '\n' 이 없기떄문에  아두이노에서 리드라인 구별이안되서 해당 코드를 추가해줘야 인식할수 있다
+								bw.flush();
 							}
 						}
 					} catch (IOException e) {
@@ -111,7 +100,7 @@ public class AndroidArduinoServer extends Application{
 				e1.printStackTrace();
 			}
 		});
-		
+
 		FlowPane flowPane = new FlowPane();
 		flowPane.setPrefSize(700, 40);
 		flowPane.setPadding(new Insets(10, 10, 10, 10)); // 상,하,좌,우 Padding
@@ -129,8 +118,8 @@ public class AndroidArduinoServer extends Application{
 			System.exit(0); // 0 => program 강제종료
 		});
 		primaryStage.show();
-		
-		/////////////////Arduino Serial Port Connection/////////////////////
+
+		///////////////// Arduino Serial Port Connection/////////////////////
 		CommPortIdentifier portIdentifier;
 		try {
 			portIdentifier = CommPortIdentifier.getPortIdentifier("COM7");
@@ -144,10 +133,10 @@ public class AndroidArduinoServer extends Application{
 							SerialPort.PARITY_NONE);
 					in = serialPort.getInputStream();
 					out = serialPort.getOutputStream();
-					//문자열 형테로 한줄로 데이터 전송 (아두이노에게)
+					// 문자열 형테로 한줄로 데이터 전송 (아두이노에게)
 					bw = new BufferedWriter(new OutputStreamWriter(out));
 					// Event처리를 통해서 데이터 읽어온다
-					serialPort.addEventListener(new SerialListener1(in, socket)); // InputStream을 넘겨줘서  Exam02_SerialListener 에서 사용
+					serialPort.addEventListener(new SerialListener2(in, socket));
 					serialPort.notifyOnDataAvailable(true); // 데이터가 들어왔을때 알려주는 method
 				} else {
 					System.out.println("Serial Port만 이용 가능");
@@ -157,49 +146,45 @@ public class AndroidArduinoServer extends Application{
 			System.out.println(e);
 		}
 	}
-	
+
 	public void printMsg(String msg) {
-		Platform.runLater(()->{
-			textArea.appendText(msg+"\n");
+		Platform.runLater(() -> {
+			textArea.appendText(msg + "\n");
 		});
 	}
-	
-	class SerialListener1 implements SerialPortEventListener{
+	//Serial Communication method로서 Data를 Arduino 로부터 받아와 Android에 데이터를 넘겨준다
+	class SerialListener2 implements SerialPortEventListener {
 		InputStream in;
 		PrintWriter printWriter;
 		Socket socket;
-		SerialListener1(InputStream in,Socket socket){
+
+		SerialListener2(InputStream in, Socket socket) {
 			this.in = in;
 			this.socket = socket;
-//			try {
-//				this.printWriter = new PrintWriter(socket.getOutputStream());
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			}
 		}
-		
+
 		@Override
 		public void serialEvent(SerialPortEvent arg0) {
-			//SerialPortEvent.DATA_AVAILABLE 데이터가 들어온 이벤트
-			if(arg0.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
+			// SerialPortEvent.DATA_AVAILABLE 데이터가 들어온 이벤트
+			if (arg0.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
 				try {
-					int size = in.available(); // in 데이터가 있냐고 물어보는 함수 return값이 데이터에 크기이다 
+					int size = in.available(); // in 데이터가 있냐고 물어보는 함수 return값이 데이터에 크기이다
 					byte[] data = new byte[size];
-					in.read(data,0,size); //data 안에 0 부터 size크기 까지
-					String result = "";
-					
-					for(int i=0; i<size; i++) {
-						if(data[i] == '\n') {
+					in.read(data, 0, size); // data 안에 0 부터 size크기 까지
+					String result = new String(data);
+
+					for (int i = 0; i < size; i++) {
+						if (data[i] == '\n' && data[0] != '\n') {
 							printMsg(result);
 							pr.println(result);
 							pr.flush();
-						}else {
-							result+= new String(data);
+						} else if(data[0] != '\n'){
+							result += new String(data).trim();
 						}
 					}
-					
-					// 위 코드는 System.out.print("Data: "+new String(buffer,0,len)); 와 달리 data에 size가 결정됫기떄문에 data만 명시해준다
-					
+//					printMsg(result);
+//					pr.println(new String(data));
+//					pr.flush();
 				} catch (Exception e) {
 					System.out.println(e);
 				}
@@ -207,4 +192,3 @@ public class AndroidArduinoServer extends Application{
 		}
 	}
 }
-
