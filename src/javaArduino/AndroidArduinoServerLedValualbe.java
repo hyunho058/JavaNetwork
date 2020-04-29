@@ -122,7 +122,7 @@ public class AndroidArduinoServerLedValualbe extends Application {
 		///////////////// Arduino Serial Port Connection/////////////////////
 		CommPortIdentifier portIdentifier;
 		try {
-			portIdentifier = CommPortIdentifier.getPortIdentifier("COM7");
+			portIdentifier = CommPortIdentifier.getPortIdentifier("COM4");
 			if (portIdentifier.isCurrentlyOwned()) {
 				System.out.println("포트 사용중");
 			} else {
@@ -171,15 +171,17 @@ public class AndroidArduinoServerLedValualbe extends Application {
 					int size = in.available(); // in 데이터가 있냐고 물어보는 함수 return값이 데이터에 크기이다
 					byte[] data = new byte[size];
 					in.read(data, 0, size); // data 안에 0 부터 size크기 까지
-					String result = new String(data);
-
+					String result = "";
+					//Arduino로 부터 받아온 데이터를 Android 에 넘겨준다
+					System.out.println(size);
 					for (int i = 0; i < size; i++) {
 						if (data[i] == '\n' && data[0] != '\n') {
+							result=result.replace("\n", "");
 							printMsg(result);
 							pr.println(result);
 							pr.flush();
-						} else if(data[0] != '\n'){
-							result += new String(data).trim();
+						} else if(data[i] != '\n'){
+							result += data[i];
 						}
 					}
 //					printMsg(result);
