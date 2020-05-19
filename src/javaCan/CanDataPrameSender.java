@@ -1,13 +1,16 @@
 package javaCan;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.ServerSocket;
+import java.io.PrintWriter;
+import java.net.Socket;
 
-import chattingProgram.MultiRoomChatRunnable;
 import gnu.io.CommPort;
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
+import gnu.io.SerialPortEvent;
+import gnu.io.SerialPortEventListener;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -20,14 +23,14 @@ import javafx.stage.Stage;
 
 public class CanDataPrameSender extends Application{
 	TextArea textArea;
-	Button btnConn, btnSend;
+	Button btnConn, btnSend, btnReady;
 	
 	CommPortIdentifier portIdentifier;
 	CommPort commPort;
 	SerialPort serialPort;
 	
 	OutputStream outputStream;
-	
+	InputStream inputStream;
 	
 	public static void main(String[] args) {
 		launch();
@@ -54,8 +57,18 @@ public class CanDataPrameSender extends Application{
 		btnSend.setPadding(new Insets(10));
 		btnSend.setOnAction(e ->{
 			//DataFrame 전송
-			String msg = "";
+			String msg = "W28000000060000000000000011";
 			sendDataFrame(msg);
+		});
+		
+		btnReady = new Button("Ready");
+		btnReady.setPrefSize(200, 50);
+		btnReady.setPadding(new Insets(10));
+		btnReady.setOnAction(e ->{
+			//DataFrame 전송
+			String msg = "Z380f3400000006";
+			String start = "G11";
+			recieveDataFrame(msg, start);
 		});
 		
 		FlowPane flowPane = new FlowPane();
@@ -63,6 +76,7 @@ public class CanDataPrameSender extends Application{
 		flowPane.setHgap(10);
 		flowPane.getChildren().add(btnConn);
 		flowPane.getChildren().add(btnSend);
+		flowPane.getChildren().add(btnReady);
 		root.setBottom(flowPane);
 		Scene scene = new Scene(root);
 		primaryStage.setScene(scene);
@@ -91,6 +105,9 @@ public class CanDataPrameSender extends Application{
 					serialPort.setSerialPortParams(
 							9600, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 					outputStream = serialPort.getOutputStream();
+					inputStream = serialPort.getInputStream();
+					serialPort.addEventListener(new SerialListenerCan(inputStream));
+					serialPort.notifyOnDataAvailable(true); // 데이터가 들어왔을때 알려주는 method
 					printMsg("PortConnectionSuccess");
 				}
 			}
@@ -99,8 +116,110 @@ public class CanDataPrameSender extends Application{
 		}
 	}
 	
+	//Data Frame 를 전송하는 Method
 	private void sendDataFrame(String msg) {
-		
+		//CRC를 계산하기 위한 Code처리
+		msg = msg.toUpperCase();
+		checkSumData(msg);
 	}
+	
+	private void recieveDataFrame(String msg, String start) {
+		msg = msg.toUpperCase();
+		checkSumData(msg);
+		start = start.toUpperCase();
+		checkSumData(start);
+		
+		Thread thread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				String msg;
+				int data;
+				while(true) {
+					try {
+						int size = inputStream.available(); // in 데이터가 있냐고 물어보는 함수 return값이 데이터에 크기이다
+						byte[] data1 = new byte[10];
+						inputStream.read(data1, 0, size); // data 안에 0 부터 size크기 까지
+						String result = "";
+						//Arduino로 부터 받아온 데이터를 Android 에 넘겨준다
+						System.out.println(size);
+						for (int i = 0; i < size; i++) {
+							if (data1[i] == '\n' && data1[0] != '\n') {
+								result=result.replace("\n", "");
+								printMsg(result);
+							} else if(data1[i] != '\n'){
+								result += data1[i];
+							}
+						}
+//						printMsg(result);
+//						pr.println(new String(data));
+//						pr.flush();
+					} catch (Exception e) {
+						System.out.println(e);
+					}
+					
+//					msg = inputStream;
+					try {
+						data = inputStream.read();
+						msg =String.valueOf(data);
+						printMsg(msg);
+					} catch (IOException e) {
+						e.printStackTrace();
+						System.out.println("IOException=="+e);
+					}
+					
+				}
+			}
+		});
+//		thread.start();
+	}
+	
+	private void checkSumData(String chckData) {
+		int checkSumData = 0;
+		char c[] = chckData.toCharArray();
+		for(char cValue : c) {
+			checkSumData += cValue;
+		}
+		checkSumData = (checkSumData & 0xFF);
+		String sendMsg = ":" + chckData + Integer.toHexString(checkSumData).toUpperCase()+"\r";
+		//0x0d == \r 이다
+		printMsg("Send Data=="+sendMsg);
+		byte[] sendData = sendMsg.getBytes();
+		try {
+			outputStream.write(sendData);
+			System.out.println("Data Send Success");
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+	}
+	
+	class SerialListenerCan implements SerialPortEventListener {
+		InputStream in;
+		PrintWriter printWriter;
+		Socket socket;
 
+		SerialListenerCan(InputStream in) {
+			this.in = in;
+		}
+
+		@Override
+		public void serialEvent(SerialPortEvent arg0) {
+			// SerialPortEvent.DATA_AVAILABLE 데이터가 들어온 이벤트
+			if (arg0.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
+				try {
+					int size = in.available(); // in 데이터가 있냐고 물어보는 함수 return값이 데이터에 크기이다
+					byte[] data = new byte[size];
+					in.read(data, 0, size); // data 안에 0 부터 size크기 까지
+					String result = "";
+					//Arduino로 부터 받아온 데이터를 Android 에 넘겨준다
+					System.out.println(size);
+					for (int i = 0; i < size; i++) {
+							result += data[i];
+					}
+					printMsg(result);
+				} catch (Exception e) {
+					System.out.println(e);
+				}
+			}
+		}
+	}
 }
