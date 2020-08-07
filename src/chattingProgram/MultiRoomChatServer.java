@@ -64,7 +64,7 @@ public class MultiRoomChatServer extends Application{
 			};
 			executorService.execute(runnable);
 		});
-		serverStopBtn = new Button("Server Start");
+		serverStopBtn = new Button("Server Stop");
 		serverStopBtn.setPrefSize(150, 40);
 		serverStopBtn.setOnAction(e -> {
 			printMsg("server stop");
